@@ -51,58 +51,69 @@ def fw_re_email(keyword,subject):
 
 
 #---------------Main--------------#
+if __name__ == '__main__':
+    path = 'raw_emails/*'
+    # summary: 2d dictionary to store each email's infomation
+    # key: email-id value: {In-Reply-To, Subject,  Date}
+    summary = {}
+    read_folder(path)
 
-path = 'raw_emails/*'
-# summary: 2d dictionary to store each email's infomation
-# key: email-id value: {In-Reply-To, Subject,  Date}
-summary = {}
-read_folder(path)
-# Sort the email by date
-emails = {}
-summary = sorted(summary.items(),key = lambda kv: kv[1]['Date'])
+    # Sort the email by date
+    emails = {}
+    summary = sorted(summary.items(),key = lambda kv: kv[1]['Date'])
 
-# map subject with latest message related to this subject
-subjects = {}
+    # map subject with latest message related to this subject
+    subjects = {}
 
-# group same promotion together
-promotions = {}
+    # map to group same promotion together
+    # key: email of the promotion
+    # value: id of latest promotion from this email_address
+    promotions = {}
 
-#Group conversation
-conversation = N_ary_Tree()
+    #Group conversation
+    conversation = N_ary_Tree()
 
-for eml in summary:
-    id = eml[0]
-    info = eml[1]
-    subject = info['Subject']
-    # Case 1: no "In-Reply-To" && no "Re" in subject -> regard as a start of converation
-    # Create a new tree
-    if 'In-Reply-To' not in info and 'RE:' not in subject.upper() and 'FW:' not in subject.upper():
-        #Case 2: promotion email from same address should be in one group
-        if 'promotions' in info['From'] :
-            pass
+    for eml in summary:
+        id = eml[0]
+        info = eml[1]
+        subject = info['Subject']
+        # Case 1: no "In-Reply-To" && no "Re" in subject -> regard as a start of converation
+        # Create a new tree
+        if 'In-Reply-To' not in info and 'RE:' not in subject.upper() and 'FW:' not in subject.upper():
+            #Case 2: promotion email from same address should be in one group
+            if 'promotions' in info['From'] :
+                eml = info['From'].rsplit(' ',1)[1]
+                # Check if this promotion already exist
+                # If not exist create new branch
+                if eml not in promotions:
+                    conversation.add(id)
+                    promotions[eml] = id
+                else:
+                    p_id = promotions[eml]
+                    conversation.add(id,p_id)
+                    promotions[eml] = id
+        
+            else:
+                conversation.add(id)
+                level = {1:id}
+                subjects[subject] = level
+
         else:
-            conversation.add(id)
-            level = {1:id}
-            subjects[subject] = level
-
-    else:
-        # in-reply-id exist add message
-        if 'In-Reply-To' in info:
-            in_reply_to = info['In-Reply-To']
-            conversation.add(id,in_reply_to)
-            if ('RE:' not in subject.upper()):
-                subjects[subject][1] = id
+            # in-reply-id exist add message
+            if 'In-Reply-To' in info:
+                in_reply_to = info['In-Reply-To']
+                conversation.add(id,in_reply_to)
+                if ('RE:' not in subject.upper()):
+                    subjects[subject][1] = id
             
-        # if message is reply to some message
-        if 'RE:' in subject.upper():
-            fw_re_email('RE',subject)
+            # if message is reply to some message
+            if 'RE:' in subject.upper():
+                fw_re_email('RE',subject)
 
-        # Dealing with forward message:
-        elif 'FW:' in subject.upper():
-            fw_re_email('FW',subject)
-
-
+            # Dealing with forward message:
+            elif 'FW:' in subject.upper():
+                fw_re_email('FW',subject)
 
 
 
-conversation.print_branches(conversation.root)
+    conversation.print_branches(conversation.root)
