@@ -80,19 +80,20 @@ if __name__ == '__main__':
         # Case 1: no "In-Reply-To" && no "Re" in subject -> regard as a start of converation
         # Create a new tree
         if 'In-Reply-To' not in info and 'RE:' not in subject.upper() and 'FW:' not in subject.upper():
+            
             #Case 2: promotion email from same address should be in one group
             if 'promotions' in info['From'] :
+
                 eml = info['From'].rsplit(' ',1)[1]
                 # Check if this promotion already exist
                 # If not exist create new branch
                 if eml not in promotions:
                     conversation.add(id)
-                    promotions[eml] = id
                 else:
                     p_id = promotions[eml]
                     conversation.add(id,p_id)
-                    promotions[eml] = id
-        
+                promotions[eml] = id
+
             else:
                 conversation.add(id)
                 level = {1:id}
