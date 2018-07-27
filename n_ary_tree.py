@@ -64,8 +64,10 @@ class N_ary_Tree:
 
         
     # Function to print each branch node to leaf
-    def print_branches(self,node):
+    def branches(self,node):
+        paths = []
         for path in self.dfs(self.root):
             path_str = '<-'.join(map(str,path[1:]))
-            print path_str
+            paths.append(path_str)
+        return paths
 

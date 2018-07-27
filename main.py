@@ -34,7 +34,10 @@ def read_folder(path):
     for fle in glob.glob(path):
         with open(fle,'r') as f:
             infos = parse_email(f)
+            f.close()
         summary[infos[0]] = infos[1]
+
+
 
 # Function to dealing with forward to reply function
 def fw_re_email(keyword,subject):
@@ -48,7 +51,21 @@ def fw_re_email(keyword,subject):
     #Store into map
     subjects[sub][n+1] = id
 
+# Function to output result
+def output(conversations,n=1):
+    for conv in conversations:
+        print ('Conversation%d: ' %n)
+        print conv
+        n = n+1
 
+def write_result_file(conversations,n=1):
+    output = open('result.txt','w+')
+    for conv in conversations:
+        output.write('Conversation%d:\n ' %n)
+        output.write(conv)
+        output.write('\n')
+        n = n+1
+    output.close()
 
 #---------------Main--------------#
 if __name__ == '__main__':
@@ -115,6 +132,12 @@ if __name__ == '__main__':
             elif 'FW:' in subject.upper():
                 fw_re_email('FW',subject)
 
+    # List contains all the conversation
+    conversations = conversation.branches(conversation.root)
+    
+    # Output result in terminal and written to file
+    output(conversations)
+    write_result_file(conversations)
 
 
-    conversation.print_branches(conversation.root)
+
