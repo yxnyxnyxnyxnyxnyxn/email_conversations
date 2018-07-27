@@ -9,8 +9,8 @@ class TestNAryTree(unittest.TestCase):
         tree.add('example1')
         tree.add('example2','example1')
         tree.add('example4','example1')
-        #case1: root
-        self.assertEqual(tree.find_node(tree.root,'example1'),tree.root)
+        #case1: start
+        self.assertEqual(tree.find_node(tree.root,'example1').key,'example1')
         #case2: normal leaf
         self.assertEqual(tree.find_node(tree.root,'example2').key,'example2')
         self.assertEqual(tree.find_node(tree.root,'example4').key,'example4')
