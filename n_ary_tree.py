@@ -29,6 +29,7 @@ class N_ary_Tree:
             found = self.find_node(child,key)
             if found:
                 return found
+        return None
 
 
     
